@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("")
+}
+
+model Insumos{
+  id String @id @default(uuid())
+  nome String
+  producaoId String
+  fabricante String
+  tipo String
+  unidade_medida String
+  itemEvento Eventos[]
+  producao TipoProducao @relation(fields: [producaoId], references: [id], onDelete: Cascade)
+}
+
+model TipoProducao{
+  id String @id @default(uuid())
+  nome String
+  tempo_medio_safra_dias String
+  isumos_recomendados String
+  safra Safra[]
+  insumos Insumos[]
+}
+
+model FazendaLocal{
+  id String @id @default(uuid())
+  nome_local String
+  eventoId String
+  area_total Int
+  lotes Lote[]
+  sublotes Sublote[]
+  eventos Eventos[]
+
+}
+
+model Lote{
+  id String @id @default(uuid())
+  nome String
+  fazendaId String
+  eventoId String
+  area_total Int
+  eventos Eventos[]
+  fazenda FazendaLocal @relation(fields: [fazendaId], references: [id], onDelete: Cascade)
+}
+
+model Sublote{
+  id String @id @default(uuid())
+  nome String
+  fazendaId String
+  eventoId String
+  area_total Int
+  eventos Eventos[]
+  fazenda FazendaLocal @relation(fields: [fazendaId], references: [id], onDelete: Cascade)
+}
+
+model Safra{
+  id String @id @default(uuid())
+  producaoId String
+  tipos_lotes String
+  tipos_sublotes String
+  data_inicio DateTime @default(now())
+  data_previsao DateTime
+  data_final String
+  producao TipoProducao @relation(fields: [producaoId], references: [id], onDelete: Cascade)
+}
+
+model Eventos{
+  id String @id @default(uuid())
+  LoteId String
+  subloteId String
+  fazendaId String
+  insumoId String
+  isumo_usado String
+  tipo_evento String
+  gastos String
+  fazenda FazendaLocal @relation(fields: [fazendaId], references: [id], onDelete: Cascade)
+  lotes Lote @relation(fields: [LoteId], references: [id], onDelete: Cascade)
+  sublote Sublote @relation(fields: [subloteId], references: [id], onDelete: Cascade)
+  insumo Insumos @relation(fields: [insumoId], references: [id], onDelete: Cascade)
+}
+
+model Sensores{
+  id String @id @default(uuid())
+  nome String
+  tipo_sensor String
+  dados Dados[]
+}
+
+model Dados{
+  id String @id @default(uuid())
+  SensorId String
+  criado_em DateTime @default(now())
+  jsonValue Json
+  sensor Sensores @relation(fields: [SensorId], references: [id], onDelete: Cascade)
+}
